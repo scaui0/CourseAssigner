@@ -1,0 +1,15 @@
+[project]
+name = "course-assigner"
+version = "0.1.0"
+description = "This program assigns students with 3 preferences each to courses."
+requires-python = ">=3.13"
+dependencies = [
+    "networkx[default]"
+]
+
+[project.scripts]
+courseassigner = "course_assigner:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
