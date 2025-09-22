@@ -13,8 +13,8 @@ After I worked one and a half hours, I got a prototype which worked very good. I
 students, it assigned 170 students to their first preference, and only 4 persons weren't assigned to any of their
 preferences.
 
-And after I worked 2 or 3 hours more, I got a near perfect result, which I suggested out student council for the next
-Project Days. And they accepted!
+And after I worked 2 or 3 hours more, I got a program with a near perfect result, which I suggested our student council
+for the next Project Days. And they accepted!
 
 ## Install
 
