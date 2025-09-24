@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from collections import defaultdict
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import networkx as nx
 
 WEIGHTS = {
@@ -16,12 +15,6 @@ WEIGHTS = {
 
 class ValidationError(Exception):
     pass
-
-
-def draw_graph(assignments):
-    graph = nx.DiGraph(assignments)
-    nx.draw(graph, with_labels=True)
-    plt.show()
 
 
 def print_assignments(assignments):
@@ -153,21 +146,23 @@ DEFAULT_PREFERENCES_PATH = (
 )
 
 
-def get_first_existing_path(check_paths):
+def get_first_existing_path(check_paths, *, error_message="No file found!"):
     for potential_path in check_paths:
         if potential_path.exists():
             return potential_path
 
-    raise ValidationError("No file found!")
+    raise ValidationError(error_message)
 
 
 def get_courses_and_preferences_files(
         input_path: Path, courses_path: Path | None = None, preferences_path: Path | None = None):
     if courses_path is None:
-        courses_path = get_first_existing_path(input_path / p for p in DEFAULT_COURSES_PATHS)
+        courses_path = get_first_existing_path((input_path / p for p in DEFAULT_COURSES_PATHS),
+                                               error_message="Not course file found!")
         print(f"Using course path: {courses_path}")
     if preferences_path is None:
-        preferences_path = get_first_existing_path(input_path / p for p in DEFAULT_PREFERENCES_PATH)
+        preferences_path = get_first_existing_path((input_path / p for p in DEFAULT_PREFERENCES_PATH),
+                                                   error_message="No preferences file found!")
         print(f"Using preferences path: {preferences_path}")
 
     return courses_path, preferences_path
@@ -192,12 +187,6 @@ def main():
                         default=Path.cwd() / "input")
     parser.add_argument("-o", "--output", type=Path, help="The path for the output file", required=False,
                         default=Path.cwd() / "output.txt")
-    parser.add_argument(
-        "-g", "--graph", action="store_true",
-        help="Whether to open a new windows that shows a graph with all students and courses. "
-             "(Might be unreadable when using many students)",
-        required=False
-    )
 
     args = parser.parse_args()
 
@@ -214,8 +203,6 @@ def main():
     print_assignments(assignments)
     write_assignments(assignments, args.output)
     print_statistic(calculate_statistic(assignments, student_preferences))
-    if args.graph:
-        draw_graph(assignments)
 
 
 if __name__ == '__main__':

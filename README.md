@@ -35,54 +35,22 @@ Run the following command:
 
 ## Usage
 
-To run the program, use the `courseassigner` command from your terminal.
-
-Use the `--courses <path to your courses.json file>` and `--preferences <path to your preferences.json>` to tell the
-program about your courses and preferences. If you want to open a graph with all students connected to their courses,
-add `--graph` or `-g`. Warning: only use this for a small number of students as the names will overlap and be
-unreadable.
+To run the program, use the `courseassigner` command from your terminal. CourseAssigner will look for courses and
+preferences in the `input` folder. You can specify them manually by using the `-c` and `-p` option.
 
 ### Examples
 
-`courseassigner -c courses.json -p preferences.json` will output an optimized assignment for all students in
-`preferences.json` and all courses of `courses.json`.
+`courseassigner` will output an optimized assignment for all students in `input/preferences.csv` and all courses of
+`input/courses.csv`.
 
 ## Testing the Program
 
 If you are not sure about this program, you can test it by generating random student preferences. I included a script
-`generate_random_presets.py` in the `scripts` folder to do so. You can run it, either using the terminal command
+`generate_random_presets.py` in the `scripts` folder to do so. To run it, either using the terminal command
 `python scripts/generate_random_presets.py` or by double-clicking the file.
 
-The script will generate two files `courses` and `preferences.json` inside the root folder.
+The script will generate two files `courses.json` and `preferences.json` inside the `input` folder.
 
 ## The Input File Formats
 
-The input files `courses` and `preferences.json` have specific formats.
-
-### `courses.json`
-
-The courses file is just a mapping of the course name and capacity.
-
-#### Example
-
-```json
-{
-  "Programming": 15,
-  "Psychology": 30
-}
-```
-
-### `preferences.json`
-
-The preferences file contains the students with their three preferences (in order). Note that every name can only be
-used once, if you are facing problems, consider adding last names.
-
-#### Example
-
-```json
-{
-  "Aaron": ["Pottery", "Chess", "Music Production"],
-  "Abdiel": ["Programming", "Swimming", "Yoga"],
-  "Abdul": ["Pottery", "Robotics", "Drama"]
-}
-```
+The program accepts both `csv` and `json` files. For detailed examples see the `formats` folder.
