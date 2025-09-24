@@ -33,6 +33,18 @@ def print_assignments(assignments):
         print()
 
 
+def write_assignments(assignments, path: Path):
+    result = []
+    for course, students in assignments.items():
+        result.append(f"# {course}")
+        for student in students:
+            result.append(f"- {student}")
+
+        result.append("")
+
+    path.write_text("\n".join(result), "utf-8")
+
+
 def calculate_statistic(assignments, student_preferences):
     assignments_reversed = {
         student: [c for c, students in assignments.items() if student in students][0]
@@ -109,43 +121,89 @@ def read_courses_and_preferences(courses_path: Path, preferences_path: Path):
     if courses_path.suffix == ".json":
         courses = json.loads(courses_path.read_text("utf-8"))
     elif courses_path.suffix == ".csv":
-        with courses_path.open() as file:
-            courses_raw = csv.DictReader(file, delimiter=";")
+        courses_raw = csv.DictReader(courses_path.read_text("utf-8").splitlines(), delimiter=";")
 
-            courses = {course["Name"]: int(course["Capacity"]) for course in courses_raw}
+        courses = {course["Name"]: int(course["Capacity"]) for course in courses_raw}
     else:
         raise ValidationError(f"Invalid suffix {courses_path.suffix!r} for courses file!")
 
     if preferences_path.suffix == ".json":
         preferences = json.loads(preferences_path.read_text("utf-8"))
     elif preferences_path.suffix == ".csv":
-        with preferences_path.open() as file:
-            preferences_raw = csv.DictReader(file, delimiter=";")
+        preferences_raw = csv.DictReader(preferences_path.read_text("utf-8").splitlines(), delimiter=";")
 
-            preferences = {
-                student["Name"]: [student["Preference1"], student["Preference2"], student["Preference3"]]
-                for student in preferences_raw
-            }
+        preferences = {
+            student["Name"]: [student["Preference1"], student["Preference2"], student["Preference3"]]
+            for student in preferences_raw
+        }
     else:
         raise ValidationError(f"Invalid suffix {preferences_path.suffix!r} for courses file!")
 
     return courses, preferences
 
 
+DEFAULT_COURSES_PATHS = (
+    "courses.csv",
+    "courses.json"
+)
+
+DEFAULT_PREFERENCES_PATH = (
+    "preferences.csv",
+    "preferences.json"
+)
+
+
+def get_first_existing_path(check_paths):
+    for potential_path in check_paths:
+        if potential_path.exists():
+            return potential_path
+
+    raise ValidationError("No file found!")
+
+
+def get_courses_and_preferences_files(
+        input_path: Path, courses_path: Path | None = None, preferences_path: Path | None = None):
+    if courses_path is None:
+        courses_path = get_first_existing_path(input_path / p for p in DEFAULT_COURSES_PATHS)
+        print(f"Using course path: {courses_path}")
+    if preferences_path is None:
+        preferences_path = get_first_existing_path(input_path / p for p in DEFAULT_PREFERENCES_PATH)
+        print(f"Using preferences path: {preferences_path}")
+
+    return courses_path, preferences_path
+
+
 def main():
-    parser = ArgumentParser("CourseAssigner",
-                            description="This program assigns students with 3 preferences each to courses.")
-    parser.add_argument("-c", "--courses", type=Path, help="The file containing the courses", required=True)
-    parser.add_argument("-p", "--preferences", type=Path, help="The file containing the student's preferences",
-                        required=True)
-    parser.add_argument("-g", "--graph", action="store_true",
-                        help="Whether to open a new windows that shows a graph with all students and courses. "
-                             "(Might be unreadable when using many students)",
-                        required=False)
+    parser = ArgumentParser(
+        "CourseAssigner",
+        description="This program assigns students with 3 preferences each to courses."
+    )
+    parser.add_argument(
+        "-c", "--courses", type=Path,
+        help="The file containing the courses. Preferred over files in input folder",
+        required=False
+    )
+    parser.add_argument(
+        "-p", "--preferences", type=Path,
+        help="The file containing the student's preferences. Preferred over files in input folder",
+        required=False
+    )
+    parser.add_argument("-i", "--input", type=Path, help="The path for the input folder", required=False,
+                        default=Path.cwd() / "input")
+    parser.add_argument("-o", "--output", type=Path, help="The path for the output file", required=False,
+                        default=Path.cwd() / "output.txt")
+    parser.add_argument(
+        "-g", "--graph", action="store_true",
+        help="Whether to open a new windows that shows a graph with all students and courses. "
+             "(Might be unreadable when using many students)",
+        required=False
+    )
 
     args = parser.parse_args()
 
-    courses, student_preferences = read_courses_and_preferences(args.courses, args.preferences)
+    courses_path, preferences_path = get_courses_and_preferences_files(args.input, args.courses, args.preferences)
+
+    courses, student_preferences = read_courses_and_preferences(courses_path, preferences_path)
 
     validate(courses, student_preferences)
 
@@ -154,6 +212,7 @@ def main():
         student_preferences
     )
     print_assignments(assignments)
+    write_assignments(assignments, args.output)
     print_statistic(calculate_statistic(assignments, student_preferences))
     if args.graph:
         draw_graph(assignments)

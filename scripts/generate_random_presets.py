@@ -33,6 +33,7 @@ def generate_courses():
 
     return generated
 
+
 num_students = input(f"How many random students would you like to generate?\nPress enter to use default (300) ")
 num_students = int(num_students or 300)
 
@@ -41,6 +42,6 @@ print(f"Generating random preferences for {num_students} students.")
 for name in islice(NAMES, num_students):
     assignments[name] = generate_courses()
 
-(Path(__file__).parent.parent / "preferences.json").write_text(json.dumps(assignments), encoding="utf-8")
-(Path(__file__).parent.parent / "courses.json").write_text(json.dumps(COURSES_WITH_CAPACITY), encoding="utf-8")
+(Path(__file__).parent.parent / "input/preferences.json").write_text(json.dumps(assignments), encoding="utf-8")
+(Path(__file__).parent.parent / "input/courses.json").write_text(json.dumps(COURSES_WITH_CAPACITY), encoding="utf-8")
 print("Done.")
