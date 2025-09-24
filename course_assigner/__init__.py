@@ -1,3 +1,4 @@
+import csv
 import json
 from argparse import ArgumentParser
 from collections import defaultdict
@@ -104,6 +105,33 @@ def assign_to_courses(courses: dict[str, int], student_preferences: dict[str, li
     return assignments
 
 
+def read_courses_and_preferences(courses_path: Path, preferences_path: Path):
+    if courses_path.suffix == ".json":
+        courses = json.loads(courses_path.read_text("utf-8"))
+    elif courses_path.suffix == ".csv":
+        with courses_path.open() as file:
+            courses_raw = csv.DictReader(file, delimiter=";")
+
+            courses = {course["Name"]: int(course["Capacity"]) for course in courses_raw}
+    else:
+        raise ValidationError(f"Invalid suffix {courses_path.suffix!r} for courses file!")
+
+    if preferences_path.suffix == ".json":
+        preferences = json.loads(preferences_path.read_text("utf-8"))
+    elif preferences_path.suffix == ".csv":
+        with preferences_path.open() as file:
+            preferences_raw = csv.DictReader(file, delimiter=";")
+
+            preferences = {
+                student["Name"]: [student["Preference1"], student["Preference2"], student["Preference3"]]
+                for student in preferences_raw
+            }
+    else:
+        raise ValidationError(f"Invalid suffix {preferences_path.suffix!r} for courses file!")
+
+    return courses, preferences
+
+
 def main():
     parser = ArgumentParser("CourseAssigner",
                             description="This program assigns students with 3 preferences each to courses.")
@@ -117,8 +145,7 @@ def main():
 
     args = parser.parse_args()
 
-    courses = json.loads(args.courses.read_text("utf-8"))
-    student_preferences = json.loads(args.preferences.read_text("utf-8"))
+    courses, student_preferences = read_courses_and_preferences(args.courses, args.preferences)
 
     validate(courses, student_preferences)
 
