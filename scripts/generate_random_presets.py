@@ -42,6 +42,9 @@ print(f"Generating random preferences for {num_students} students.")
 for name in islice(NAMES, num_students):
     assignments[name] = generate_courses()
 
-(Path(__file__).parent.parent / "input/preferences.json").write_text(json.dumps(assignments), encoding="utf-8")
-(Path(__file__).parent.parent / "input/courses.json").write_text(json.dumps(COURSES_WITH_CAPACITY), encoding="utf-8")
+INPUT_FOLDER = Path(__file__).parent.parent / "input"
+INPUT_FOLDER.mkdir(exist_ok=True)
+
+(INPUT_FOLDER / "preferences.json").write_text(json.dumps(assignments), encoding="utf-8")
+(INPUT_FOLDER / "courses.json").write_text(json.dumps(COURSES_WITH_CAPACITY), encoding="utf-8")
 print("Done.")

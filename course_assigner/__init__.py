@@ -17,9 +17,9 @@ class ValidationError(Exception):
     pass
 
 
-def print_assignments(assignments):
+def print_assignments(assignments, courses):
     for course, students in assignments.items():
-        print(f"[{course}]")
+        print(f"[{course}] {len(students)}/{courses[course]}")
         for student in students:
             print(student)
 
@@ -155,14 +155,21 @@ def get_first_existing_path(check_paths, *, error_message="No file found!"):
 
 
 def get_courses_and_preferences_files(
-        input_path: Path, courses_path: Path | None = None, preferences_path: Path | None = None):
+        input_path: Path,
+        courses_path: Path | None = None,
+        preferences_path: Path | None = None
+):
     if courses_path is None:
-        courses_path = get_first_existing_path((input_path / p for p in DEFAULT_COURSES_PATHS),
-                                               error_message="Not course file found!")
+        courses_path = get_first_existing_path(
+            (input_path / p for p in DEFAULT_COURSES_PATHS),
+            error_message="No course file found!"
+        )
         print(f"Using course path: {courses_path}")
     if preferences_path is None:
-        preferences_path = get_first_existing_path((input_path / p for p in DEFAULT_PREFERENCES_PATH),
-                                                   error_message="No preferences file found!")
+        preferences_path = get_first_existing_path(
+            (input_path / p for p in DEFAULT_PREFERENCES_PATH),
+            error_message="No preferences file found!"
+        )
         print(f"Using preferences path: {preferences_path}")
 
     return courses_path, preferences_path
@@ -200,7 +207,7 @@ def main():
         courses,
         student_preferences
     )
-    print_assignments(assignments)
+    print_assignments(assignments, courses)
     write_assignments(assignments, args.output)
     print_statistic(calculate_statistic(assignments, student_preferences))
 
